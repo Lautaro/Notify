@@ -1,6 +1,6 @@
 {
-	"name" : "com.lautaro-arino.notify",
-	"displayName" : "Notify Mesage Bus",
+	"name" : "com.lautaro-arino.notifyer",
+	"displayName" : "Notifyer Mesage Bus",
 	"version" : "1.0.0",
 	"author": {
     "name": "Lautaro",
