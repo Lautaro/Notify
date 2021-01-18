@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Notify
+namespace Lautaro
 {
-    public class NotiCenter
+    public class Notifyer
     {
-        static NotiCenter instance = new NotiCenter();
+        static Notifyer instance = new Notifyer();
         Dictionary<(Type, string),object> notificationTypes = new Dictionary<(Type, string), object>();
 
         static bool Match<T>((Type, string) key, string title)
