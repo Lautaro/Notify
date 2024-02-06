@@ -2,95 +2,91 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-
-public abstract class NotifyerEventBase { }
-
-public class NotifyerEventBase<T> : NotifyerEventBase
+namespace Lautaro.Notifyer
 {
-    public T Data { get; set; }
+    public abstract class NotifyerEventBase { }
 
-    public NotifyerEventBase(T data)
+    public class NotifyerEventBase<T> : NotifyerEventBase
     {
-        Data = data;
-    }
-    public NotifyerEventBase()
-    {
-    }
-}
+        public T Data { get; set; }
 
-public class Notifyer
-{
-    private static readonly Notifyer instance = new Notifyer();
-    private readonly Dictionary<Type, List<Delegate>> notificationTypes = new Dictionary<Type, List<Delegate>>();
-    //private readonly Dictionary<NotiPings, List<Delegate>> notificationPings = new Dictionary<NotiPings, List<Delegate>>();
-
-    //public static void Subscribe(NotiPings notiPing, UnityAction callback)
-    //{
-    //    if (!instance.notificationPings.ContainsKey(notiPing))
-    //    {
-    //        instance.notificationPings[notiPing] = new List<Delegate>();
-    //    }
-    //    instance.notificationPings[notiPing].Add(callback);
-    //}
-    public static void Subscribe<T>(UnityAction<T> callback) where T : NotifyerEventBase
-    {
-        var type = typeof(T);
-        if (!instance.notificationTypes.ContainsKey(type))
+        public NotifyerEventBase(T data)
         {
-            instance.notificationTypes[type] = new List<Delegate>();
+            Data = data;
         }
-        instance.notificationTypes[type].Add(callback);
-    }
-    //public static void UnSubscribe(NotiPings notiPing, UnityAction callback)
-    //{
-    //    if (instance.notificationPings.ContainsKey(notiPing))
-    //    {
-    //        var delegates = instance.notificationPings[notiPing];
-    //        delegates.Remove(callback);
-
-    //        if (delegates.Count == 0)
-    //        {
-    //            instance.notificationPings.Remove(notiPing);
-    //        }
-    //    }
-    //}
-
-    public static void Unsubscribe<T>(UnityAction<T> callback) where T : NotifyerEventBase
-    {
-        
-        var type = typeof(T);
-        if (instance.notificationTypes.ContainsKey(type))
+        public NotifyerEventBase()
         {
-            var delegates = instance.notificationTypes[type];
-            delegates.Remove(callback);
+        }
+    }
 
-            if (delegates.Count == 0)
+    public class Notifyer
+    {
+        private static readonly Notifyer instance = new Notifyer();
+        private readonly Dictionary<Type, List<Delegate>> notificationTypes = new Dictionary<Type, List<Delegate>>();
+        private readonly Dictionary<string, List<Delegate>> textNotifications = new Dictionary<string, List<Delegate>>();
+
+        public static void Subscribe<T>(UnityAction<T> callback) where T : NotifyerEventBase
+        {
+            var type = typeof(T);
+            if (!instance.notificationTypes.ContainsKey(type))
             {
-                instance.notificationTypes.Remove(type);
+                instance.notificationTypes[type] = new List<Delegate>();
+            }
+            instance.notificationTypes[type].Add(callback);
+        }
+
+       
+
+        public static void Unsubscribe<T>(UnityAction<T> callback) where T : NotifyerEventBase
+        {
+            var type = typeof(T);
+            if (instance.notificationTypes.ContainsKey(type))
+            {
+                var delegates = instance.notificationTypes[type];
+                delegates.Remove(callback);
+
+                if (delegates.Count == 0)
+                {
+                    instance.notificationTypes.Remove(type);
+                }
+            }
+        }
+
+        public static void Notify<T>(T eventInstance) where T : NotifyerEventBase
+        {
+            var type = eventInstance.GetType(); // Get the actual type of the event instance
+            if (instance.notificationTypes.TryGetValue(type, out var list))
+            {
+                foreach (Delegate del in list)
+                {
+                    (del as UnityAction<T>)?.Invoke(eventInstance);
+                }
+            }
+        }
+        public static void Subscribe(UnityAction callback, string notificationId)
+        {
+            var type = typeof(T);
+            if (!instance.textNotifications.ContainsKey(notificationId))
+            {
+                instance.textNotifications[type] = new List<Delegate>();
+            }
+            instance.textNotifications[type].Add(callback);
+        }
+
+        public static void Notify(T notificationId, bool throwError = false) where T : string
+        {
+            if (instance.textNotifications.TryGetValue(notificationId, out var list))
+            {
+                foreach (Delegate del in list)
+                {
+                    (del as UnityAction<T>)?.Invoke(eventInstance);
+                }
+            }
+            else
+            {
+                if (throwError)
+                    throw new Exception("Notifyer is trying to notify with notiticiation message id:"+notificationId+" but no one is receiving.");
             }
         }
     }
-
-    public static void Notify<T>(T eventInstance) where T : NotifyerEventBase
-    {
-        var type = eventInstance.GetType(); // Get the actual type of the event instance
-        if (instance.notificationTypes.TryGetValue(type, out var list))
-        {
-            foreach (Delegate del in list)
-            {
-                (del as UnityAction<T>)?.Invoke(eventInstance);
-            }
-        }
-    }
-
-    //public static void Notify(NotiPings notiPing) 
-    //{
-    //    if (instance.notificationPings.TryGetValue(notiPing, out var list))
-    //    {
-    //        foreach (Delegate del in list)
-    //        {
-    //            (del as UnityAction)?.Invoke();
-    //        }
-    //    }
-    //}
 }
