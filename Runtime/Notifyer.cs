@@ -35,7 +35,7 @@ namespace Lautaro.Notifyer
             instance.notificationTypes[type].Add(callback);
         }
 
-       
+
 
         public static void Unsubscribe<T>(UnityAction<T> callback) where T : NotifyerEventBase
         {
@@ -65,27 +65,26 @@ namespace Lautaro.Notifyer
         }
         public static void Subscribe(UnityAction callback, string notificationId)
         {
-            var type = typeof(T);
             if (!instance.textNotifications.ContainsKey(notificationId))
             {
-                instance.textNotifications[type] = new List<Delegate>();
+                instance.textNotifications[notificationId] = new List<Delegate>();
             }
-            instance.textNotifications[type].Add(callback);
+            instance.textNotifications[notificationId].Add(callback);
         }
 
-        public static void Notify(T notificationId, bool throwError = false) where T : string
+        public static void Notify(string notificationId, bool throwError = false)
         {
             if (instance.textNotifications.TryGetValue(notificationId, out var list))
             {
                 foreach (Delegate del in list)
                 {
-                    (del as UnityAction<T>)?.Invoke(eventInstance);
+                    (del as UnityAction)?.Invoke();
                 }
             }
             else
             {
                 if (throwError)
-                    throw new Exception("Notifyer is trying to notify with notiticiation message id:"+notificationId+" but no one is receiving.");
+                    throw new Exception("Notifyer is trying to notify with notiticiation message id:" + notificationId + " but no one is receiving.");
             }
         }
     }
