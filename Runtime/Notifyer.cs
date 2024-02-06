@@ -63,7 +63,7 @@ namespace Lautaro.Notifyer
                 }
             }
         }
-        public static void Subscribe(UnityAction callback, string notificationId)
+        public static void Subscribe(string notificationId, UnityAction callback)
         {
             if (!instance.textNotifications.ContainsKey(notificationId))
             {
